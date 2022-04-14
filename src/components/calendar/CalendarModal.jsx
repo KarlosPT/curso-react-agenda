@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
@@ -10,7 +10,7 @@ import moment from 'moment';
  import Swal from 'sweetalert2/dist/sweetalert2.js'
  import 'sweetalert2/src/sweetalert2.scss'
 import { uiCloseModal } from '../../actions/ui';
-import { eventAddNew } from '../../actions/events';
+import { eventAddNew, eventClearActiveEvent, eventUpdate } from '../../actions/events';
 
 
 const customStyles = {
@@ -23,10 +23,19 @@ const customStyles = {
       transform: 'translate(-50%, -50%)',
     },
   };
-  Modal.setAppElement('#root');
 
+  
+  
+  Modal.setAppElement('#root');
+  
   const now = moment().minute(0).second(0).add(1, 'hours');
   const endDate = now.clone().add(1, 'hours');
+  const initEvent = {
+    title: 'Evento',
+    notes: '',
+    start: now.toDate(),
+    end: endDate.toDate(),
+    };
 
 export const CalendarModal = () => {
 
@@ -37,15 +46,19 @@ export const CalendarModal = () => {
 
     const dispatch = useDispatch();
     const {modalOpen} = useSelector( state => state.ui );
+    const {activeEvent} = useSelector( state => state.calendar );
 
-    const [formValues, setFormValues] = useState({
-        title: 'Evento',
-        notes: '',
-        start: now.toDate(),
-        end: endDate.toDate(),
-    });
+
+    const [formValues, setFormValues] = useState(initEvent);
 
     const { title, notes, start, end  } = formValues;
+
+    useEffect(() => {
+        if(activeEvent){
+            setFormValues(activeEvent);
+        }
+    }, [activeEvent, setFormValues]);
+    
 
     const handleInputChange = (e) => {
         setFormValues({
@@ -56,8 +69,9 @@ export const CalendarModal = () => {
 
     const closeModal = () => {
         //ToDo: close modal
-
         dispatch( uiCloseModal() );
+        dispatch( eventClearActiveEvent () );
+        setFormValues(initEvent);
         
     }
 
@@ -77,17 +91,13 @@ export const CalendarModal = () => {
             end: e,
         });
 
-
-
     }
-
 
     const handleSubmitForm = (e) => {
         e.preventDefault();
 
         const momentStart = moment(start);
         const momentEnd = moment(end);
-
 
         if(momentStart.isSameOrAfter(momentEnd)){
             Swal.fire('Error', 'La fecha de inicio debe ser menor a la fecha de fin', 'error');
@@ -99,15 +109,21 @@ export const CalendarModal = () => {
             return setTitleValid(false);
         }
 
-        //Todo: Realizar la grabación
-        dispatch(eventAddNew({
-            ...formValues,
-            id: new Date().getTime(),
-            user:{
-                _id: '123',
-                name: 'Carlos',
-            }
-        }));
+        if(activeEvent){
+            dispatch(eventUpdate(formValues));
+        }
+        else{
+
+            //Todo: Realizar la grabación
+            dispatch(eventAddNew({
+                ...formValues,
+                id: new Date().getTime(),
+                user:{
+                    _id: '123',
+                    name: 'Carlos',
+                }
+            }));
+        }
 
         setTitleValid(true);
         closeModal();
@@ -182,5 +198,6 @@ export const CalendarModal = () => {
 
             </form>
       </Modal>    
+
   )
 }
