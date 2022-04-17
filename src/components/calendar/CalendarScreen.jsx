@@ -13,8 +13,9 @@ import { CalendarModal } from './CalendarModal';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'moment/dist/locale/es-mx';
 import { uiOpenModal } from '../../actions/ui';
-import { eventSetActive } from '../../actions/events';
+import { eventClearActiveEvent, eventSetActive } from '../../actions/events';
 import { AddNewFab } from '../ui/AddNewFab';
+import { DeleteEventFab } from '../ui/DeleteEventFab';
 
 moment.locale('es-mx');
 
@@ -36,7 +37,7 @@ export const CalendarScreen = () => {
 
   const dispatch = useDispatch();
 
-  const {events} = useSelector( state => state.calendar );
+  const {events, activeEvent } = useSelector( state => state.calendar );
 
   const [lastView, setLastView] = useState(localStorage.getItem('lastView') || 'month');
 
@@ -67,7 +68,9 @@ export const CalendarScreen = () => {
       style: style
     };
   }
-
+  const onSelectSlot = (e) => {
+    dispatch( eventClearActiveEvent() );
+  }
   return (
     <div className='calendar-screen'>
 
@@ -82,6 +85,8 @@ export const CalendarScreen = () => {
           onSelectEvent={onSelectEvent}
           onDoubleClickEvent={onDoubleClick}
           onView={ onViewChange}
+          onSelectSlot={onSelectSlot}
+          selectable={true}
           view={lastView}
           eventPropGetter={eventStyleGetter}
         
@@ -91,6 +96,10 @@ export const CalendarScreen = () => {
         />
 
           <AddNewFab/>
+          {
+            activeEvent && <DeleteEventFab/>
+          
+          }
         <CalendarModal />
     </div>
   )
