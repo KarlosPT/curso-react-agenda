@@ -10,7 +10,7 @@ import moment from 'moment';
  import Swal from 'sweetalert2/dist/sweetalert2.js'
  import 'sweetalert2/src/sweetalert2.scss'
 import { uiCloseModal } from '../../actions/ui';
-import { eventAddNew, eventClearActiveEvent, eventUpdate } from '../../actions/events';
+import { eventClearActiveEvent, eventStartAddNew, eventstartUpdate } from '../../actions/events';
 
 
 const customStyles = {
@@ -113,19 +113,12 @@ export const CalendarModal = () => {
         }
 
         if(activeEvent){
-            dispatch(eventUpdate(formValues));
+            dispatch(eventstartUpdate(formValues));
         }
         else{
 
             //Todo: Realizar la grabación
-            dispatch(eventAddNew({
-                ...formValues,
-                id: new Date().getTime(),
-                user:{
-                    _id: '123',
-                    name: 'Carlos',
-                }
-            }));
+            dispatch(eventStartAddNew(formValues));
         }
 
         setTitleValid(true);

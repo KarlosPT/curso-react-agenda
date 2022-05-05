@@ -24,9 +24,6 @@ export const AppRouter = () => {
   }
   
 
-  console.log("valor de uid:", !!uid);
-  console.log("valor de uid2:", !uid);
-
   return (
     <BrowserRouter>
         
